@@ -53,6 +53,8 @@ type ControllerComments struct {
 	AllowHTTPMethods []string
 	Params           []map[string]string
 	MethodParams     []*param.MethodParam
+	HaveExtra        bool
+	Extra            string
 }
 
 // Controller defines some basic http request handler operations, such as

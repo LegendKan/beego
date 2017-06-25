@@ -119,7 +119,7 @@ type ControllerInfo struct {
 	routerType     int
 	methodParams   []*param.MethodParam
 	haveExtra      bool
-	extra          sting
+	extra          string
 }
 
 // ControllerRegister containers registered router rules, controller handlers and filters.

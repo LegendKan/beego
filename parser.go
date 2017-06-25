@@ -318,7 +318,9 @@ func genRouterCode(pkgRealpath string) {
 			` + "Router: `" + c.Router + "`" + `,
 			AllowHTTPMethods: ` + allmethod + `,
 			MethodParams: ` + methodParams + `,
-			Params: ` + params + `})
+			Params: ` + params + `,
+			HaveExtra: ` + strconv.FormatBool(c.HaveExtra) + `,
+			Extra: "` + c.Extra + `"})
 `
 		}
 	}
