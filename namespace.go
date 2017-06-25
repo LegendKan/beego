@@ -89,6 +89,8 @@ func (n *Namespace) Filter(action string, filter ...FilterFunc) *Namespace {
 		a = BeforeRouter
 	} else if action == "after" {
 		a = FinishRouter
+	} else if action == "beforeexec" {
+		a = BeforeExec
 	}
 	for _, f := range filter {
 		n.handlers.InsertFilter("*", a, f)
@@ -293,6 +295,13 @@ func NSBefore(filterList ...FilterFunc) LinkNamespace {
 func NSAfter(filterList ...FilterFunc) LinkNamespace {
 	return func(ns *Namespace) {
 		ns.Filter("after", filterList...)
+	}
+}
+
+// NSBeforeExec add Namespace BeforeExec filter
+func NSBeforeExec(filterList ...FilterFunc) LinkNamespace {
+	return func(ns *Namespace) {
+		ns.Filter("beforeexec", filterList...)
 	}
 }
 

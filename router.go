@@ -118,6 +118,8 @@ type ControllerInfo struct {
 	runFunction    FilterFunc
 	routerType     int
 	methodParams   []*param.MethodParam
+	haveExtra      bool
+	extra          sting
 }
 
 // ControllerRegister containers registered router rules, controller handlers and filters.
@@ -153,10 +155,10 @@ func NewControllerRegister() *ControllerRegister {
 //	Add("/api",&RestController{},"get,post:ApiFunc"
 //	Add("/simple",&SimpleController{},"get:GetFunc;post:PostFunc")
 func (p *ControllerRegister) Add(pattern string, c ControllerInterface, mappingMethods ...string) {
-	p.addWithMethodParams(pattern, c, nil, mappingMethods...)
+	p.addWithMethodParams(pattern, c, nil, false, "", mappingMethods...)
 }
 
-func (p *ControllerRegister) addWithMethodParams(pattern string, c ControllerInterface, methodParams []*param.MethodParam, mappingMethods ...string) {
+func (p *ControllerRegister) addWithMethodParams(pattern string, c ControllerInterface, methodParams []*param.MethodParam, hasextra bool, extra string, mappingMethods ...string) {
 	reflectVal := reflect.ValueOf(c)
 	t := reflect.Indirect(reflectVal).Type()
 	methods := make(map[string]string)
@@ -188,6 +190,8 @@ func (p *ControllerRegister) addWithMethodParams(pattern string, c ControllerInt
 	route.routerType = routerTypeBeego
 	route.controllerType = t
 	route.methodParams = methodParams
+	route.extra = extra
+	route.haveExtra = hasextra
 	if len(methods) == 0 {
 		for _, m := range HTTPMETHOD {
 			p.addToRouter(m, pattern, route)
@@ -252,7 +256,7 @@ func (p *ControllerRegister) Include(cList ...ControllerInterface) {
 		key := t.PkgPath() + ":" + t.Name()
 		if comm, ok := GlobalControllerRouter[key]; ok {
 			for _, a := range comm {
-				p.addWithMethodParams(a.Router, c, a.MethodParams, strings.Join(a.AllowHTTPMethods, ",")+":"+a.Method)
+				p.addWithMethodParams(a.Router, c, a.MethodParams, a.HaveExtra, a.Extra, strings.Join(a.AllowHTTPMethods, ",")+":"+a.Method)
 			}
 		}
 	}
@@ -720,6 +724,11 @@ func (p *ControllerRegister) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 		for k, v := range strings.Split(splat, "/") {
 			context.Input.SetParam(strconv.Itoa(k), v)
 		}
+	}
+
+	if routerInfo != nil {
+		context.Input.SetData("HaveExtra", routerInfo.haveExtra)
+		context.Input.SetData("Extra", routerInfo.extra)
 	}
 
 	//execute middleware filters

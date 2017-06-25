@@ -102,6 +102,8 @@ type parsedComment struct {
 	routerPath string
 	methods    []string
 	params     map[string]parsedParam
+	haveExtra  bool
+	extra      string
 }
 
 type parsedParam struct {
@@ -125,6 +127,8 @@ func parserComments(f *ast.FuncDecl, controllerName, pkgpath string) error {
 			cc.Router = parsedComment.routerPath
 			cc.AllowHTTPMethods = parsedComment.methods
 			cc.MethodParams = buildMethodParams(f.Type.Params.List, parsedComment)
+			cc.HaveExtra = parsedComment.haveExtra
+			cc.Extra = parsedComment.extra
 			genInfoList[key] = append(genInfoList[key], cc)
 		}
 
@@ -220,6 +224,9 @@ func parseComment(lines []*ast.Comment) (pc *parsedComment, err error) {
 				pc.params = map[string]parsedParam{}
 			}
 			pc.params[funcParamName] = p
+		} else if strings.HasPrefix(t, "@extra") {
+			pc.haveExtra = true
+			pc.extra = strings.TrimSpace(strings.TrimLeft(t, "@extra"))
 		}
 	}
 	return
